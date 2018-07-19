@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Car Sizer</title>
+		
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+				integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+				crossorigin="anonymous"></script>
+	</head>
+	<body>
+		<p>Multiply Body Height By: <span id="bodyOneVal"></span></p>
+        <input type="range" min="1" max="4" value="1" id="bodyOne">
+        <p>Multiply Wheel Width By: <span id="bodyTwoVal"></span></p>
+        <input type="range" min="1" max="4" value="1" id="bodyTwo">
+		<br/>
+		<button type="button">Update</button>
+		<br/>
+		<iframe style="min-width: 70vw; min-height:40vh" src="burgreen/frog/index.html" id="fullCar"> </iframe>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				var bodyOneSlider = document.getElementById("bodyOne");
+				var bodyOneOutput = document.getElementById("bodyOneVal");
+				bodyOneOutput.innerHTML = bodyOneSlider.value;
+				bodyOneSlider.oninput = function() {
+					bodyOneOutput.innerHTML = this.value;
+				};
+				var bodyTwoSlider = document.getElementById("bodyTwo");
+				var bodyTwoOutput = document.getElementById("bodyTwoVal");
+				bodyTwoOutput.innerHTML = bodyTwoSlider.value;
+				bodyTwoSlider.oninput = function() {
+					bodyTwoOutput.innerHTML = this.value;
+				};
+				
+				$("button").click(function(){
+					var bodyOneParams = [1, 1, bodyOneSlider.value];
+					var bodyTwoParams = [1, bodyTwoSlider.value, 1];
+					var sendInfo = {
+						"burgreen/frog/data/body.stl": String(bodyOneParams),
+						"burgreen/frog/data/wheels.stl": String(bodyTwoParams)
+					};
+					console.log(sendInfo);
+					$.ajax({
+						type:'POST',
+						dataType:'json',
+						data: sendInfo,
+						url:'http://localhost:8080/',
+						crossDomain: true,
+						success: function(data) {
+							alert("You did it!");
+						},
+						error: function(request, status, error) {
+							console.log(request.statusCode());
+							alert("Error " + error);
+						}
+					});
+					document.getElementById('fullCar').contentWindow.location.reload();
+			   });
+			});
+		</script>
+	</body>
+</html>
