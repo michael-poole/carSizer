@@ -1,6 +1,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json, urllib
 import stlScale
+import stlTranslate
 
 
 class MySimpleHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -14,7 +15,8 @@ class MySimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         in_data = self.rfile.read(in_content_length)
         decoded_in_data = str(urllib.parse.unquote_to_bytes(in_data))
 
-        stlScale.main(decoded_in_data)
+        # stlScale.main(decoded_in_data)
+        stlTranslate.main()
 
         body = bytes('{"Hello": "World"}', "utf-8")
         self.send_response(200)
