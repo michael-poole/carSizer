@@ -10,8 +10,8 @@
 	<body>
 		<p>Multiply Body Height By: <span id="bodyOneVal"></span></p>
         <input type="range" min="1" max="4" value="1" id="bodyOne">
-        <p>Multiply Wheel Width By: <span id="bodyTwoVal"></span></p>
-        <input type="range" min="1" max="4" value="1" id="bodyTwo">
+        <p>Multiply Wheel Width By: <span id="wheelVal"></span></p>
+        <input type="range" min="1" max="4" value="1" id="wheel">
 		<br/>
 		<button type="button">Update</button>
 		<br/>
@@ -24,19 +24,26 @@
 				bodyOneSlider.oninput = function() {
 					bodyOneOutput.innerHTML = this.value;
 				};
-				var bodyTwoSlider = document.getElementById("bodyTwo");
-				var bodyTwoOutput = document.getElementById("bodyTwoVal");
-				bodyTwoOutput.innerHTML = bodyTwoSlider.value;
-				bodyTwoSlider.oninput = function() {
-					bodyTwoOutput.innerHTML = this.value;
+				var wheelSlider = document.getElementById("wheel");
+				var wheelOutput = document.getElementById("wheelVal");
+				wheelOutput.innerHTML = wheelSlider.value;
+				wheelSlider.oninput = function() {
+					wheelOutput.innerHTML = this.value;
 				};
 				
 				$("button").click(function(){
 					var bodyOneParams = [1, 1, bodyOneSlider.value];
-					var bodyTwoParams = [1, bodyTwoSlider.value, 1];
+					var wheelParams = [wheelSlider.value, 1, wheelSlider.value];
 					var sendInfo = {
 						"burgreen/frog/data/body.stl": String(bodyOneParams),
-						"burgreen/frog/data/wheels.stl": String(bodyTwoParams)
+						"burgreen/frog/data/frontLeftTire.stl": String(wheelParams),
+						"burgreen/frog/data/frontRightTire.stl": String(wheelParams),
+						"burgreen/frog/data/backLeftTire.stl": String(wheelParams),
+						"burgreen/frog/data/backRightTire.stl": String(wheelParams),
+						"burgreen/frog/data/frontLeftWheel.stl": String(wheelParams),
+						"burgreen/frog/data/frontRightWheel.stl": String(wheelParams),
+						"burgreen/frog/data/backLeftWheel.stl": String(wheelParams),
+						"burgreen/frog/data/backRightWheel.stl": String(wheelParams),
 					};
 					console.log(sendInfo);
 					$.ajax({

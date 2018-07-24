@@ -19,8 +19,14 @@ const part = []
   part.push('engine')
   part.push('transmission')
   part.push('brakes')
-  part.push('wheels')
-  part.push('tires')
+  part.push('frontLeftWheel')
+  part.push('frontRightWheel')
+  part.push('backLeftWheel')
+  part.push('backRightWheel')
+  part.push('frontLeftTire')
+  part.push('frontRightTire')
+  part.push('backLeftTire')
+  part.push('backRightTire')
 }
 
 // ----------------------------------------------------------------------------
