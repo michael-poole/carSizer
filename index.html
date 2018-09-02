@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<head>
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+
 		<title>Car Sizer</title>
 		
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"
@@ -8,34 +12,126 @@
 				crossorigin="anonymous"></script>
 	</head>
 	<body>
-		<p>Multiply Body Height By: <span id="bodyOneVal"></span></p>
-        <input type="range" min="1" max="4" value="1" id="bodyOne">
-        <p>Multiply Wheel Width By: <span id="wheelVal"></span></p>
-        <input type="range" min="1" max="4" value="1" id="wheel">
+        <p>Current Wheel Diameter: <span id="wheelDiameter"></span></p>
+        <p>Input New Diameter: <input type="input" id="newWheelDiameter"> </p>
+        <p>Current Distance Between Wheels: <span id="wheelDistance"></span></p>
+        <p>Input New Distance: <input type="input" id="newWheelDistance"></p>
 		<br/>
 		<button type="button">Update</button>
 		<br/>
 		<iframe style="min-width: 70vw; min-height:40vh" src="burgreen/frog/index.html" id="fullCar"> </iframe>
 		<script type="text/javascript">
+            function parseParams(params){
+                parsedPartAndSize = params.split("{")[1].split("}")[0].split('","');
+                var parsedPartNames = new Array(parsedPartAndSize.length);
+                var parsedSizes = new Array(parsedPartAndSize.length);
+                for (var i = 0; i < parsedPartAndSize.length; i++){
+                    parsedPartAndSize[i] = parsedPartAndSize[i].replace(/\"/g, "");
+                    parsedPartNames[i] = parsedPartAndSize[i].split(":")[0];
+                    parsedSizes[i] = parsedPartAndSize[i].split(":")[1].split("[")[1].split("]")[0].split(", ");   
+                }
+                var finalParse = {}
+                for (var i = 0; i < parsedSizes.length; i++){
+                    var lengthOfSizes = 3;
+                    for (var j = 0; j < lengthOfSizes; j++){
+                        parsedSizes[i][j] = parseFloat(parsedSizes[i][j]);
+                    }
+                    finalParse[parsedPartNames[i]] = parsedSizes[i];
+                }
+                return finalParse;
+            }
+            
+            function paramsAjaxCallBack(myParams){
+                var wheelDiameterOutput = document.getElementById("wheelDiameter");
+                var wheelDistanceOutput = document.getElementById("wheelDistance");
+                
+                var parsedParams = parseParams(myParams);
+                
+                wheelDiameterOutput.innerHTML = parsedParams["frontLeftWheel"][2];
+                wheelDistanceOutput.innerHTML = parsedParams["transmission"][0];
+            }
+            
+            function paramsAjaxCall(){
+                initInfo = {
+                    "type": "Params",
+                    "parts": "tires, transmission, brakes, wheels"
+                }
+                
+                $.ajax({
+                    type:'POST',
+                    dataType:'json',
+                    data: initInfo,
+                    url:'http://localhost:8080/',
+                    crossDomain: true,
+                    success: function(data) {
+                        paramsAjaxCallBack(JSON.stringify(data));
+                    },
+                    error: function(request, status, error) {
+                        console.log(request.statusCode());
+                        alert("Error " + error);
+                    }
+                });
+            }
+            
+            function getInputs(){
+                var namesAndInputs = {};
+                var names = ["New Wheel Diameter",
+                             "New Distance Between Wheels"];
+                var inputWheelDiameter = parseFloat(document.getElementById("newWheelDiameter").value);
+                var inputWheelDistance = parseFloat(document.getElementById("newWheelDistance").value);
+                var myInputs = [inputWheelDiameter,
+                                inputWheelDistance]
+                for (var i = 0; i < names.length; i++){
+                    if (!isNaN(myInputs[i]) && myInputs[i] > 0){
+                        namesAndInputs[names[i]] = myInputs[i];
+                    }
+                    else if (myInputs[i] <= 0){
+                        alert("Please input a positive value for " + names[i]);
+                    }
+                }
+                return namesAndInputs;
+            }
+
+            function getWheelParams(data){
+                console.log("test");
+                console.log(Object.keys(data));
+                console.log(data["New Wheel Diameter"]);
+                if("New Wheel Diameter" in data){
+                    var newDiameter = parseFloat(data["New Wheel Diameter"]);
+                    var oldDiameter = parseFloat(document.getElementById("wheelDiameter").innerHTML);
+                    var sizeRatio = newDiameter / oldDiameter;
+                    return [sizeRatio, 1, sizeRatio];
+                }
+                else{
+                    return [1, 1, 1];
+                }
+            }
+            
+            function getWheelDistanceParams(data){
+                console.log("test");
+                console.log(Object.keys(data));
+                console.log(data["New Distance Between Wheels"]);
+                if("New Distance Between Wheels" in data){
+                    var newDiameter = parseFloat(data["New Distance Between Wheels"]);
+                    var oldDiameter = parseFloat(document.getElementById("wheelDistance").innerHTML);
+                    var sizeRatio = newDiameter / oldDiameter;
+                    return [1, sizeRatio, 1];
+                }
+                else{
+                    return [1, 1, 1];
+                }
+            }
+
 			$(document).ready(function(){
-				var bodyOneSlider = document.getElementById("bodyOne");
-				var bodyOneOutput = document.getElementById("bodyOneVal");
-				bodyOneOutput.innerHTML = bodyOneSlider.value;
-				bodyOneSlider.oninput = function() {
-					bodyOneOutput.innerHTML = this.value;
-				};
-				var wheelSlider = document.getElementById("wheel");
-				var wheelOutput = document.getElementById("wheelVal");
-				wheelOutput.innerHTML = wheelSlider.value;
-				wheelSlider.oninput = function() {
-					wheelOutput.innerHTML = this.value;
-				};
+                paramsAjaxCall();
 				
 				$("button").click(function(){
-					var bodyOneParams = [1, 1, bodyOneSlider.value];
-					var wheelParams = [wheelSlider.value, 1, wheelSlider.value];
+                    inputs = getInputs();
+                    var wheelParams = getWheelParams(inputs);
+                    // var wheelDistanceParams = getWheelDistanceParams(inputs);
+                    
 					var sendInfo = {
-						"burgreen/frog/data/body.stl": String(bodyOneParams),
+                        "type": "Scale",
 						"burgreen/frog/data/frontLeftTire.stl": String(wheelParams),
 						"burgreen/frog/data/frontRightTire.stl": String(wheelParams),
 						"burgreen/frog/data/backLeftTire.stl": String(wheelParams),
@@ -44,6 +140,10 @@
 						"burgreen/frog/data/frontRightWheel.stl": String(wheelParams),
 						"burgreen/frog/data/backLeftWheel.stl": String(wheelParams),
 						"burgreen/frog/data/backRightWheel.stl": String(wheelParams),
+                        "burgreen/frog/data/frontLeftBrake.stl": String(wheelParams),
+						"burgreen/frog/data/frontRightBrake.stl": String(wheelParams),
+						"burgreen/frog/data/backLeftBrake.stl": String(wheelParams),
+						"burgreen/frog/data/backRightBrake.stl": String(wheelParams)
 					};
 					console.log(sendInfo);
 					$.ajax({
@@ -53,14 +153,15 @@
 						url:'http://localhost:8080/',
 						crossDomain: true,
 						success: function(data) {
-							alert("You did it!");
+                            paramsAjaxCall();
+                            document.getElementById('newWheelDiameter').value = "";
 						},
 						error: function(request, status, error) {
 							console.log(request.statusCode());
 							alert("Error " + error);
 						}
 					});
-					document.getElementById('fullCar').contentWindow.location.reload();
+					document.getElementById('fullCar').src = document.getElementById('fullCar').src;
 			   });
 			});
 		</script>

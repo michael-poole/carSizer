@@ -11,9 +11,11 @@ def save_new_stl_file(model, new_file_name):
 
 
 def main():
-    stl_file = "burgreen/frog/data/frontLeftTire.stl"
+    stl_file = "burgreen/frog/data/frontRightBrake.stl"
     stl_model = make_model_from_stl_file(stl_file)
-
-    stl_model.z += 49.3
+    
+    stl_model.z -= 31
 
     save_new_stl_file(stl_model, stl_file)
+
+main()
