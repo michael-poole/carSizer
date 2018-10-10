@@ -1,0 +1,8 @@
+Start xampp Apache server
+Open cmd line
+Run httpScript.py
+Open localhost/carSizer in browser
+Change the car size
+To see results (until bug is fixed) open localhost/carSizer in an incognito page
+
+If you ever need to reset the car model, copy the contents of burgreenBackup to burgreen
