@@ -26,9 +26,8 @@ def make_part(my_part_name):
     
     
 def parse_data(raw_data):
-    all_data = raw_data.split('\'')[1].split("type=Params&")[1]
-    data = all_data.split('&')   
-    part_names = str(data[0]).split('=')[1].split(",+")
+    part_data = raw_data.split('"type": "Params", "parts": "')[1].split('"}')[0]  
+    part_names = part_data.split(", ")
     
     return(part_names)
 
@@ -76,7 +75,6 @@ def get_height(dims):
 
 
 def main(data):
-    # parsed_data = ["brakes", 2, 3, 4, 5]
     parsed_data = parse_data(data)
     stl_files = []
     parts = []

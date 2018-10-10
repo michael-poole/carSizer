@@ -52,10 +52,10 @@
             }
             
             function paramsAjaxCall(){
-                initInfo = {
-                    "type": "Params",
-                    "parts": "tires, transmission, brakes, wheels"
-                }
+                var initInfo = '{';
+                initInfo += '"type": "Params", ';
+                initInfo += '"parts": "tires, transmission, brakes, wheels"';
+                initInfo += '}';
                 
                 $.ajax({
                     type:'POST',
@@ -93,9 +93,6 @@
             }
 
             function getWheelParams(data){
-                console.log("test");
-                console.log(Object.keys(data));
-                console.log(data["New Wheel Diameter"]);
                 if("New Wheel Diameter" in data){
                     var newDiameter = parseFloat(data["New Wheel Diameter"]);
                     var oldDiameter = parseFloat(document.getElementById("wheelDiameter").innerHTML);
@@ -108,17 +105,15 @@
             }
             
             function getWheelDistanceParams(data){
-                console.log("test");
-                console.log(Object.keys(data));
-                console.log(data["New Distance Between Wheels"]);
                 if("New Distance Between Wheels" in data){
-                    var newDiameter = parseFloat(data["New Distance Between Wheels"]);
-                    var oldDiameter = parseFloat(document.getElementById("wheelDistance").innerHTML);
-                    var sizeRatio = newDiameter / oldDiameter;
-                    return [1, sizeRatio, 1];
+                    var newDistance = parseFloat(data["New Distance Between Wheels"]);
+                    var oldDistance = parseFloat(document.getElementById("wheelDistance").innerHTML);
+                    var distanceChange = (newDistance - oldDistance) / 2;
+                    var distanceRatio = newDistance / oldDistance;
+                    return [[0, distanceChange, 0], [1, distanceRatio, 1]];
                 }
                 else{
-                    return [1, 1, 1];
+                    return [[0, 0, 0], [1, 1, 1]];
                 }
             }
 
@@ -128,23 +123,39 @@
 				$("button").click(function(){
                     inputs = getInputs();
                     var wheelParams = getWheelParams(inputs);
-                    // var wheelDistanceParams = getWheelDistanceParams(inputs);
+                    var wheelDistanceParams = getWheelDistanceParams(inputs);
+                    var distanceBetweenWheels = wheelDistanceParams[0];
+                    var transmissionSizeRatio = wheelDistanceParams[1];
                     
-					var sendInfo = {
-                        "type": "Scale",
-						"burgreen/frog/data/frontLeftTire.stl": String(wheelParams),
-						"burgreen/frog/data/frontRightTire.stl": String(wheelParams),
-						"burgreen/frog/data/backLeftTire.stl": String(wheelParams),
-						"burgreen/frog/data/backRightTire.stl": String(wheelParams),
-						"burgreen/frog/data/frontLeftWheel.stl": String(wheelParams),
-						"burgreen/frog/data/frontRightWheel.stl": String(wheelParams),
-						"burgreen/frog/data/backLeftWheel.stl": String(wheelParams),
-						"burgreen/frog/data/backRightWheel.stl": String(wheelParams),
-                        "burgreen/frog/data/frontLeftBrake.stl": String(wheelParams),
-						"burgreen/frog/data/frontRightBrake.stl": String(wheelParams),
-						"burgreen/frog/data/backLeftBrake.stl": String(wheelParams),
-						"burgreen/frog/data/backRightBrake.stl": String(wheelParams)
-					};
+					var sendInfo = '{"type": "Scale", ';
+                    sendInfo += '"mode": "Scale", ';
+					sendInfo += '"burgreen/frog/data/frontLeftTire.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/frontRightTire.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/backLeftTire.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/backRightTire.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/frontLeftWheel.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/frontRightWheel.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/backLeftWheel.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/backRightWheel.stl": ' + String(wheelParams) + ', ';
+                    sendInfo += '"burgreen/frog/data/frontLeftBrake.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/frontRightBrake.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/backLeftBrake.stl": ' + String(wheelParams) + ', ';
+					sendInfo += '"burgreen/frog/data/backRightBrake.stl": ' + String(wheelParams) + ', ';
+                    sendInfo += '"burgreen/frog/data/transmission.stl": ' + String(transmissionSizeRatio) + ', ';
+                    sendInfo += '"mode": "Distance", ';
+                    sendInfo += '"burgreen/frog/data/frontLeftTire.stl": ' + String(distanceBetweenWheels) + ', ';
+                    sendInfo += '"burgreen/frog/data/frontRightTire.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/backLeftTire.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/backRightTire.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/frontLeftWheel.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/frontRightWheel.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/backLeftWheel.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/backRightWheel.stl": ' + String(distanceBetweenWheels) + ', ';
+                    sendInfo += '"burgreen/frog/data/frontLeftBrake.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/frontRightBrake.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/backLeftBrake.stl": ' + String(distanceBetweenWheels) + ', ';
+					sendInfo += '"burgreen/frog/data/backRightBrake.stl": ' + String(distanceBetweenWheels);
+					sendInfo += '}';
 					console.log(sendInfo);
 					$.ajax({
 						type:'POST',

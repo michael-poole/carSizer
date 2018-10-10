@@ -26,10 +26,16 @@ def make_model_from_stl_file(file_name):
 
 
 def scale_model(model, scale_factors_xyz):
-    print("yup")
     print(scale_factors_xyz)
-    print("yup")
     model.x, model.y, model.z = model.x*scale_factors_xyz[0], model.y*scale_factors_xyz[1], model.z*scale_factors_xyz[2]
+
+
+def set_distance_model(model, name, distance_factors_xyz):
+    print(distance_factors_xyz)
+    if("Left" in name):
+        model.x, model.y, model.z = model.x - float(distance_factors_xyz[0]), model.y - float(distance_factors_xyz[1]), model.z - float(distance_factors_xyz[2])
+    else:
+        model.x, model.y, model.z = model.x + float(distance_factors_xyz[0]), model.y + float(distance_factors_xyz[1]), model.z + float(distance_factors_xyz[2])
 
 
 def generate_new_file_name(file_name):
@@ -40,18 +46,26 @@ def generate_new_file_name(file_name):
 def save_new_stl_file(model, new_file_name):
     model.save(new_file_name)
 
+
 def parse_data(raw_data):
-    all_data = raw_data.split('\'')[1].split("type=Scale&")[1]
-    data = all_data.split('&')
+    all_data = raw_data.split('"type": "Scale", ')[1]
+    data = all_data.split(', ')
+    new_data = []
+    for item in data:
+        item = item.replace('\"', '').rstrip('}')
+        new_data.append(item)
     tuple_data = []
-    for datum in data:
-        part_name = datum.split('=')[0]
-        scale_string = datum.split('=')[1]
-        scale_string_list = scale_string.lstrip('[').rstrip(']').split(',')
-        scale_number_list = []
-        for num in scale_string_list:
-            scale_number_list.append(float(num))
-        tuple_data.append( (part_name, scale_number_list) )
+    for datum in new_data:
+        part_name = datum.split(': ')[0]
+        scale_string = datum.split(': ')[1]
+        if("," in scale_string):
+            scale_string_list = scale_string.lstrip('[').rstrip(']').split(',')
+            scale_number_list = []
+            for num in scale_string_list:
+                scale_number_list.append(float(num))
+            tuple_data.append( (part_name, scale_number_list) )
+        else:
+            tuple_data.append( (part_name, scale_string) )
     return(tuple_data)
 
 
@@ -75,21 +89,29 @@ def set_to_original(model, xyz_cog):
     while i <= 2:
         pos_list[i] += float(xyz_cog[i])
         i += 1
-    
+
 def main(data):
     stl_scale_factor_tuples = parse_data(data)
+    mode = ""
     for stl_scale_factor_tuple in stl_scale_factor_tuples:
 
         stl_file = stl_scale_factor_tuple[0]
-        
-        stl_model = make_model_from_stl_file(stl_file)
 
-        scale_xyz = stl_scale_factor_tuple[1]
-        original_cog = get_original_cog(stl_model)
-        
-        set_to_center(stl_model, original_cog)
-        scale_model(stl_model, scale_xyz)
-        set_to_original(stl_model, original_cog)
+        if(stl_file == "mode"):
+            mode = stl_scale_factor_tuple[1]
+        else:
+            stl_model = make_model_from_stl_file(stl_file)
 
-        # new_stl_file = generate_new_file_name(stl_file)
-        save_new_stl_file(stl_model, stl_file)
+            scale_xyz = stl_scale_factor_tuple[1]
+            print(scale_xyz)
+            if(mode == "Scale"):
+                original_cog = get_original_cog(stl_model)
+
+                set_to_center(stl_model, original_cog)
+                scale_model(stl_model, scale_xyz)
+                set_to_original(stl_model, original_cog)
+            elif(mode == "Distance"):
+                set_distance_model(stl_model, stl_file, scale_xyz)
+
+            # new_stl_file = generate_new_file_name(stl_file)
+            save_new_stl_file(stl_model, stl_file)

@@ -11,7 +11,6 @@ def make_body_from_params(params):
 
     body = body.rstrip(", ")
     body += '}'
-    print(body)
     bytes_body = bytes(body, "utf-8")
     return bytes_body
 
@@ -27,8 +26,10 @@ class MySimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         in_data = self.rfile.read(in_content_length)
         body = bytes('{"Success": "200"}', "utf-8")
         
-        decoded_in_data = str(urllib.parse.unquote_to_bytes(in_data))
-        type = decoded_in_data.split("type=")[1].split("&")[0]
+        decoded_in_data = str(in_data.decode('utf-8'))
+        
+        type = str(decoded_in_data.split('"type": "')[1]).split('", "')[0]
+        print(type)
         if type == "Params":
             myParams = stlParams.main(decoded_in_data)
             body = make_body_from_params(myParams)
@@ -38,6 +39,7 @@ class MySimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_response(200)
         else:
             self.send_response(400)
+        
 
         self.send_header('Access-Control-Allow-Credentials', 'true')
         self.send_header('Access-Control-Allow-Origin', '*')
